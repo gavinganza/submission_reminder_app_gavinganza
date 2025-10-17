@@ -128,21 +128,17 @@ CONFIG_FILE="$SCRIPT_DIR/../config/config.env"
 load_config "$CONFIG_FILE"
 
 
-# --- FIX FOR VARIABLE SCOPE ---
-# The variables from config.env (e.g., LOG_FILE=logs/reminder.log) are relative.
-# We must convert them into absolute paths so the application works from any directory.
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 
 # Re-export the variables with the full, correct paths.
 export LOG_FILE="$PROJECT_ROOT/$LOG_FILE"
 export DATA_FILE="$PROJECT_ROOT/$DATA_FILE"
 
-# Now that LOG_FILE is an absolute path, we can safely create its parent directory.
+#  creating the parent directory of LOG_FILE.
 mkdir -p "$(dirname "$LOG_FILE")"
 
 log_message "--- Application Start ---"
 
-# Process submissions. This function will now use the correct DATA_FILE path.
 process_submissions
 
 log_message "Running final check and collecting pending students..."
@@ -166,8 +162,6 @@ fi
 
 PENDING_STUDENTS=()
 # Use 'tail -n +2' to skip the header, then redirect the output directly to the while loop's standard input.
-# This prevents the whole while loop block from being grouped into a subshell if it's the last command.
-# This is often the most reliable way to maintain array scope.
 while IFS=',' read -r -a student_data; do
     # Check if the status column exists for this row
     if [[ ${#student_data[@]} -gt "$assignment_index" ]]; then
@@ -197,7 +191,7 @@ EOF
 echo "Created and populated $REMINDER_FILE"
 
 
-# 7. Create the 'startup.sh' script (Robust execution path)
+# 7. Create the 'startup.sh' script 
 STARTUP_FILE="startup.sh"
 cat << 'EOF' > "$STARTUP_FILE"
 #!/bin/bash
